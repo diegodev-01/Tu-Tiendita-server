@@ -1,13 +1,21 @@
 from fastapi import FastAPI
+from db import db
 
-app = FastAPI()
-
+app = FastAPI(title="Tu Tiendita Server")
 
 @app.get("/")
-def read_root():
-    return {"Hello": "World"}
+async def read_root():
+    return {"message": "Servidor funcionando"}
 
+@app.get("/test-db")
+async def test_db():
+    coleccion = db["productos"]
+    resultado = await coleccion.insert_one({
+        "nombre": "Producto prueba",
+        "precio": 10
+    })
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
+    return {
+        "message": "Conexión exitosa a MongoDB",
+        "inserted_id": str(resultado.inserted_id)
+    }
