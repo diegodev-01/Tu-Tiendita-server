@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Optional
 
 
 class ProductModel(BaseModel):
@@ -17,3 +18,12 @@ class ProductModel(BaseModel):
                 "sync_date": "2026-04-14T12:00:00",
             }
         }
+
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1)
+    price: Optional[float] = Field(None, gt=1)
+    nfc_tag_id: Optional[str] = Field(None, min_length=1)
+
+    class Config:
+        schema_extra = {"example": {"name": "Coca Cola Zero", "price": 11.0}}
