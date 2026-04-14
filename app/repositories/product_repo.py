@@ -1,5 +1,5 @@
 from bson import ObjectId
-from typing import List, Optional
+from typing import List
 
 
 class ProductRepository:
