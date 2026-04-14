@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from db import db
+from app.routes.product_routes import router as product_router
 
 app = FastAPI(title="Tu Tiendita Server")
-
+app.include_router(product_router)
 
 @app.get("/")
 async def read_root():
