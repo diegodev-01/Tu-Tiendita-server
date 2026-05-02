@@ -14,3 +14,8 @@ class User(BaseModel):
     username: str
     roles: List[Role]
     permissions: List[Permission]
+
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
