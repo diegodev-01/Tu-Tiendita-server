@@ -21,3 +21,11 @@ class UserRepository:
 
     def verify_password(self, plain_password, hashed_password):
         return pwd_context.verify(plain_password, hashed_password)
+
+    def update_password(self, username: str, new_password_plain: str):
+        new_hashed_password = pwd_context.hash(new_password_plain)
+    
+        return self.collection.update_one(
+            {"username": username},
+            {"$set": {"password": new_hashed_password}}
+        )
