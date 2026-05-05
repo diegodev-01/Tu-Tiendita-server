@@ -29,3 +29,12 @@ class UserRepository:
         return self.collection.update_one(
             {"username": username}, {"$set": {"password": new_hashed_password}}
         )
+
+    def update_user_data(self, username: str, data: dict):
+        if "password" in data:
+            data["password"] = pwd_context.hash(data["password"])
+
+        return self.collection.update_one({"username": username}, {"$set": data})
+
+    def delete_user(self, username: str):
+        return self.collection.delete_one({"username": username})
