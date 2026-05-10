@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 
 class ProductBase(BaseModel):
@@ -15,7 +15,7 @@ class ProductCreate(ProductBase):
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1)
-    price: Optional[float] = Field(None, gt=0)
+    price: Optional[float] = Field(None, gt=1)
     nfc_tag_id: Optional[str] = Field(None, min_length=1)
 
 
