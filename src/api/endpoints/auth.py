@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from jose import jwt, JWTError
-
 from db import db
 from src.schemas.auth_schema import UserCreate, Token
 from src.services.auth_service import AuthService
@@ -37,8 +36,9 @@ async def login(
 
     token = service.create_token(
         data={
+            "sub": str(user.id),
             "name": user.name,
-            "sub": user.email,
+            "email": user.email,
             "roles": user.roles,
             "permissions": user.permissions,
         }
@@ -65,15 +65,15 @@ async def reset_password(
 ):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        email: str = payload.get("sub")
         action: str = payload.get("action")
 
-        if username is None or action != "password_reset":
+        if email is None or action != "password_reset":
             raise HTTPException(status_code=400, detail="Token inválido")
 
         hashed_password = service.get_password_hash(new_password)
         await service.collection.update_one(
-            {"username": username}, {"$set": {"password": hashed_password}}
+            {"email": email}, {"$set": {"password": hashed_password}}
         )
         return {"msg": "Contraseña actualizada correctamente"}
 

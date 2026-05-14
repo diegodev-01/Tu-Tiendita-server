@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 from src.models.user import Role, Permission
 
@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
 
 
 class UserAuthDetails(BaseModel):
+    id: str = Field(alias=("sub"))
     name: str
     email: str
     roles: List[Role]

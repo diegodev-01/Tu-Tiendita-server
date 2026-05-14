@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -16,16 +15,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserAuthDetai
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload["sub"]
-        if email is None:
+        if payload is None:
             raise credentials_exception
 
-        name: str = payload["name"]
-        roles: List[str] = payload["roles"]
-        permissions: List[str] = payload["permissions"]
-
-        return UserAuthDetails(
-            name=name, email=email, roles=roles, permissions=permissions
-        )
+        return UserAuthDetails(**payload)
     except JWTError:
         raise credentials_exception
