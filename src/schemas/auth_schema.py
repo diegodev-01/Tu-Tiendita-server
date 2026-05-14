@@ -4,12 +4,14 @@ from src.models.user import Role, Permission
 
 
 class UserCreate(BaseModel):
-    username: str
+    name: str
+    email: str
     password: str
 
 
 class UserAuthDetails(BaseModel):
-    username: str
+    name: str
+    email: str
     roles: List[Role]
     permissions: List[Permission]
 

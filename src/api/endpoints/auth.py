@@ -27,7 +27,9 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     service: AuthService = Depends(get_auth_service),
 ):
-    user = await service.authenticate_user(form_data.username, form_data.password)
+    user_email = form_data.username
+    user_pass = form_data.password
+    user = await service.authenticate_user(user_email, user_pass)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales incorrectas"
@@ -35,24 +37,23 @@ async def login(
 
     token = service.create_token(
         data={
-            "sub": user["username"],
-            "roles": user.get("roles", []),
-            "permissions": user.get("permissions", []),
+            "name": user.name,
+            "sub": user.email,
+            "roles": user.roles,
+            "permissions": user.permissions,
         }
     )
     return {"access_token": token, "token_type": "bearer"}
 
 
 @router.post("/forgot-password")
-async def forgot_password(
-    username: str, service: AuthService = Depends(get_auth_service)
-):
-    user = await service.collection.find_one({"username": username})
+async def forgot_password(email: str, service: AuthService = Depends(get_auth_service)):
+    user = await service.collection.find_one({"email": email})
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     reset_token = service.create_token(
-        data={"sub": username, "action": "password_reset"},
+        data={"sub": email, "action": "password_reset"},
         expires_delta=timedelta(minutes=15),
     )
     return {"reset_token": reset_token}
