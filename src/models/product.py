@@ -1,12 +1,20 @@
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
+from src.constants.PyObjectId import PyObjectId
 
 
 class Product(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    storeId: str
+    ownerId: str
     name: str
+    sku: str
+    nfcTagId: str
     price: float
-    nfc_tag_id: str
-    sync_date: datetime = Field(default_factory=datetime.utcnow)
-    owner_id: Optional[str] = None
-    is_active: bool = True
+    stock: int
+    minStock: int
+    shelf: str
+    status: str
+    createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updatedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
