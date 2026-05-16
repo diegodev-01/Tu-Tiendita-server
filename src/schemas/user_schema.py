@@ -11,3 +11,13 @@ class UserResponse(BaseModel):
     email: str
     roles: List[Role]
     permissions: List[Permission]
+
+
+class UserDataResponse(BaseModel):
+    name: str
+    email: str
+    roles: List[Role]
+
+
+class UserDataUpdate(BaseModel):
+    name: str
