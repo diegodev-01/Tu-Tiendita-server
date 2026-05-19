@@ -1,15 +1,18 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 from src.models.user import Role, Permission
 
 
 class UserCreate(BaseModel):
-    username: str
+    name: str
+    email: str
     password: str
 
 
 class UserAuthDetails(BaseModel):
-    username: str
+    id: str = Field(alias=("sub"))
+    name: str
+    email: str
     roles: List[Role]
     permissions: List[Permission]
 

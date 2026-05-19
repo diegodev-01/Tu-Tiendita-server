@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from jose import jwt, JWTError
-
 from db import db
 from src.schemas.auth_schema import UserCreate, Token
 from src.services.auth_service import AuthService
@@ -27,7 +26,9 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     service: AuthService = Depends(get_auth_service),
 ):
-    user = await service.authenticate_user(form_data.username, form_data.password)
+    user_email = form_data.username
+    user_pass = form_data.password
+    user = await service.authenticate_user(user_email, user_pass)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales incorrectas"
@@ -35,24 +36,24 @@ async def login(
 
     token = service.create_token(
         data={
-            "sub": user["username"],
-            "roles": user.get("roles", []),
-            "permissions": user.get("permissions", []),
+            "sub": str(user.id),
+            "name": user.name,
+            "email": user.email,
+            "roles": user.roles,
+            "permissions": user.permissions,
         }
     )
     return {"access_token": token, "token_type": "bearer"}
 
 
 @router.post("/forgot-password")
-async def forgot_password(
-    username: str, service: AuthService = Depends(get_auth_service)
-):
-    user = await service.collection.find_one({"username": username})
+async def forgot_password(email: str, service: AuthService = Depends(get_auth_service)):
+    user = await service.collection.find_one({"email": email})
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     reset_token = service.create_token(
-        data={"sub": username, "action": "password_reset"},
+        data={"sub": email, "action": "password_reset"},
         expires_delta=timedelta(minutes=15),
     )
     return {"reset_token": reset_token}
@@ -64,15 +65,15 @@ async def reset_password(
 ):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        email: str = payload.get("sub")
         action: str = payload.get("action")
 
-        if username is None or action != "password_reset":
+        if email is None or action != "password_reset":
             raise HTTPException(status_code=400, detail="Token inválido")
 
         hashed_password = service.get_password_hash(new_password)
         await service.collection.update_one(
-            {"username": username}, {"$set": {"password": hashed_password}}
+            {"email": email}, {"$set": {"password": hashed_password}}
         )
         return {"msg": "Contraseña actualizada correctamente"}
 

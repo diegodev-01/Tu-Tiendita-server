@@ -29,9 +29,7 @@ async def create(
     current_user: UserAuthDetails = Depends(get_current_user),
     service: ProductService = Depends(get_product_service),
 ):
-    product_id = await service.create_product(
-        product_in, owner_id=current_user.username
-    )
+    product_id = await service.create_product(product_in, ownerId=current_user.id)
     return {"message": "Producto creado", "id": product_id}
 
 
