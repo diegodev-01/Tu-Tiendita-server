@@ -17,6 +17,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class AuthService:
     def __init__(self, db):
+        self.db = db
         self.collection = db["users"]
 
     def verify_password(self, plain, hashed):
@@ -41,12 +42,33 @@ class AuthService:
             name=user_in.name,
             email=user_in.email,
             password=self.get_password_hash(user_in.password),
-            roles=[Role.CUSTOMER],
-            permissions=[Permission.PRODUCT_VIEW],
+            roles=[Role.ADMIN, Role.CUSTOMER],
+            permissions=[
+                Permission.PRODUCT_VIEW,
+                Permission.PRODUCT_CREATE,
+                Permission.PRODUCT_EDIT,
+                Permission.PRODUCT_DELETE
+            ],
         )
         user_dict = new_user.model_dump(by_alias=True)
-        await self.collection.insert_one(user_dict)
-        return {"msg": "Usuario registrado"}
+        if user_dict.get("_id") is None:
+            user_dict.pop("_id", None)
+            
+        result = await self.collection.insert_one(user_dict)
+        user_id = str(result.inserted_id)
+
+        from src.models.store import Store
+        new_store = Store(
+            ownerId=user_id,
+            name=f"Tienda de {user_in.name}"
+        )
+        store_dict = new_store.model_dump(by_alias=True)
+        if store_dict.get("_id") is None:
+            store_dict.pop("_id", None)
+            
+        await self.db["stores"].insert_one(store_dict)
+        
+        return {"msg": "Usuario registrado y tienda creada exitosamente"}
 
     async def authenticate_user(self, email, password):
         user_doc = await self.collection.find_one({"email": email})
