@@ -38,25 +38,31 @@ async def create(
     dependencies=[can_view_product],
     response_model=List[ProductResponse],
 )
-async def list_products(service: ProductService = Depends(get_product_service)):
-    return await service.get_all_products()
+async def list_products(
+    current_user: UserAuthDetails = Depends(get_current_user),
+    service: ProductService = Depends(get_product_service)
+):
+    return await service.get_all_products(current_user.id)
 
 
 @router.put("/{id}", dependencies=[can_edit_product])
 async def update(
     id: str,
     product_in: ProductUpdate,
+    current_user: UserAuthDetails = Depends(get_current_user),
     service: ProductService = Depends(get_product_service),
 ):
-    success = await service.update_product(id, product_in)
+    success = await service.update_product(id, product_in, current_user.id)
     if not success:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
+        raise HTTPException(status_code=404, detail="Producto no encontrado o no tienes permiso")
     return {"message": "Producto actualizado"}
 
 
 @router.delete("/", dependencies=[can_delete_product])
 async def delete(
-    ids: List[str], service: ProductService = Depends(get_product_service)
+    ids: List[str], 
+    current_user: UserAuthDetails = Depends(get_current_user),
+    service: ProductService = Depends(get_product_service)
 ):
-    count = await service.delete_many(ids)
+    count = await service.delete_many(ids, current_user.id)
     return {"message": f"Se eliminaron {count} productos"}
