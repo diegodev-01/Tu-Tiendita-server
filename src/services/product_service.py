@@ -27,10 +27,12 @@ class ProductService:
             
         product_dict = product_in.model_dump()
         product_dict["storeId"] = store_id
-
+        
         product_data = Product(**product_dict, ownerId=ownerId)
         data_to_insert = product_data.model_dump(by_alias=True, exclude_none=True)
+        print("Datos a insertar: ", data_to_insert)
         result = await self.collection.insert_one(data_to_insert)
+        print("Producto creado", str(result))
         return str(result.inserted_id)
 
     async def get_all_products(self, owner_id: str) -> List[dict]:

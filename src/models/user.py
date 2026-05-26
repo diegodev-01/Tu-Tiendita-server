@@ -14,3 +14,8 @@ class User(BaseModel):
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     roles: List[Role] = [Role.CUSTOMER]
     permissions: List[Permission] = Field(default=[Permission.PRODUCT_VIEW])
+
+
+class UpdateUserDTO(BaseModel):
+    telefono: Optional[str] = Field(None, pattern=r"^\+?[0-9]{7,15}$")  # Valida formatos como +59171234567
+    password: Optional[str] = Field(None, min_length=6)

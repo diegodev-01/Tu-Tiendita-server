@@ -29,6 +29,7 @@ async def login(
     user_email = form_data.username
     user_pass = form_data.password
     user = await service.authenticate_user(user_email, user_pass)
+    print("Usuario autenticado: ", user)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales incorrectas"

@@ -11,3 +11,11 @@ class UserResponse(BaseModel):
     email: str
     roles: List[Role]
     permissions: List[Permission]
+
+from datetime import datetime
+
+class UserProfileResponse(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    name: str
+    email: str
+    createdAt: datetime
